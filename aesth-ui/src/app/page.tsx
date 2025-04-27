@@ -1,4 +1,4 @@
-import styles from "./page.module.css";
+import styles from "./common.module.css";
 
 export default function Home() {
   return (
@@ -43,4 +43,4 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+};
