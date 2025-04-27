@@ -15,14 +15,13 @@ func main() {
 	}
 
 	router := gin.Default()
-	api := router.Group("/api")
-	{
-		api.POST("/auth", auth.AuthHandler)
+	router.POST("/auth", auth.AuthHandler)
 
-		protected := router.Group("")
-		protected.Use(auth.AuthMiddleware())
-		protected.GET("/ping", func(c *gin.Context) { c.IndentedJSON(http.StatusOK, "pong") })
+	api := router.Group("/api")
+	api.Use(auth.AuthMiddleware())
+	{
+		api.GET("/ping", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"pong": "yeah"}) })
 	}
 
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }
