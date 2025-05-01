@@ -2,8 +2,11 @@ package main
 
 import (
 	"aesth-api/auth"
+	"aesth-api/database"
+	"aesth-api/handlers"
+	"aesth-api/repositories"
+	"aesth-api/services"
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -14,13 +17,32 @@ func main() {
 		log.Println("No .env file found, using passed environment")
 	}
 
-	router := gin.Default()
-	router.POST("/auth", auth.AuthHandler)
+	db := database.Init()
 
-	api := router.Group("/api")
-	api.Use(auth.AuthMiddleware())
+	userRepository := repositories.NewUserRepository(db)
+
+	jwtService := auth.NewJwtService()
+	authService := services.NewAuthService(userRepository)
+	userHandler := handlers.NewUserHandler(userRepository)
+	authHandler := handlers.NewAuthHandler(jwtService, authService)
+
+	router := gin.Default()
+	authRouter := router.Group("/auth")
 	{
-		api.GET("/ping", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"pong": "yeah"}) })
+		authRouter.POST("/login", authHandler.Login)
+		authRouter.POST("/register", authHandler.Register)
+	}
+
+	apiRouter := router.Group("/api")
+	apiRouter.Use(auth.AuthMiddleware(jwtService))
+	{
+		usersRouter := apiRouter.Group("/users")
+		{
+			usersRouter.GET("/", userHandler.GetUsers)
+			usersRouter.GET("/:id", userHandler.GetUser)
+			usersRouter.PUT("/:id", userHandler.UpdateUser)
+			usersRouter.DELETE(":id", userHandler.DeleteUser)
+		}
 	}
 
 	router.Run("0.0.0.0:8080")
