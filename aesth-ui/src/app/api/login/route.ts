@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    const { email, password } = await req.json();
 
     const serverResponse = await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, password }),
     });
   
     if (serverResponse.status === 401) {
