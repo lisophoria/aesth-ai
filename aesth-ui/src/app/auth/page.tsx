@@ -10,11 +10,15 @@ export default function Auth() {
     const email = data.get("email") as string;
     const password = data.get("password") as string;
 
-    await fetch('/api/login', {
+    const response = await fetch('/api/login', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+
+    if (response.ok) {
+      window.location.href = '/';
+    }
   }
 
   return (
