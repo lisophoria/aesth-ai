@@ -20,11 +20,15 @@ func main() {
 	db := database.Init()
 
 	userRepository := repositories.NewUserRepository(db)
+	relevancyRepository := repositories.NewRelevancyRepository(db)
 
 	jwtService := auth.NewJwtService()
-	authService := services.NewAuthService(userRepository)
+	relevancyService := services.NewRelevancyService(relevancyRepository)
+	authService := services.NewAuthService(userRepository, relevancyRepository)
+
 	userHandler := handlers.NewUserHandler(userRepository)
 	authHandler := handlers.NewAuthHandler(jwtService, authService)
+	relevancyHandler := *handlers.NewRelevancyHandler(relevancyService)
 
 	router := gin.Default()
 	authRouter := router.Group("/auth")
@@ -42,6 +46,13 @@ func main() {
 			usersRouter.GET("/:id", userHandler.GetUser)
 			usersRouter.PUT("/:id", userHandler.UpdateUser)
 			usersRouter.DELETE(":id", userHandler.DeleteUser)
+		}
+
+		relevancyRouter := apiRouter.Group("/relevancy")
+		{
+			relevancyRouter.GET("/:user_id", relevancyHandler.GetByUserID)
+			relevancyRouter.POST("/:user_id/adjust", relevancyHandler.AdjustRelevancy)
+			relevancyRouter.POST("/:user_id/get-pair", relevancyHandler.GetRelevancyPair)
 		}
 	}
 

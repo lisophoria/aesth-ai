@@ -30,7 +30,7 @@ func Init() *gorm.DB {
 	}
 
 	// TODO: Local dev
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(&models.User{}, &models.Relevancy{})
 	if err != nil {
 		log.Fatal("Failed to migrate schema:", err)
 	}
